@@ -1,0 +1,17 @@
+{
+  "name": "linked",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@openzeppelin/contracts": "^2.3.0",
+    "chainlink": "^0.7.6",
+    "install": "^0.13.0",
+    "npm": "^6.12.0"
+  }
+}
