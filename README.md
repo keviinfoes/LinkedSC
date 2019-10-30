@@ -4,7 +4,7 @@ Self-collateralized stablecoin. The goal is to create a stablecoin with minimal 
 ## Description
 Linked is a self-collateralized stablecoin with minimal complexity and minimal collateral. The design is: 
 **Token contract - ERC20**. The token contract has two limitations: 
-- The tokens can't interact with contract addresses, only user addresses. This is to limit the DEX where the tokens can be traded. See point 2. 
+- The tokens can't interact with contract addresses, only user addresses. This is to limit the DEX where the tokens can be traded. See exchange contract below. 
 - When transferred the tokens have a minimal fee in ETH and LKD (for example 0.1% ETH and 0.1% LKD above the gas cost). The minimal fee (ETH and LKD) will be send to the exchange contract. Users can buy or sell LKD on the DEX for the equivalent of 1 USD.
 
 **Exchange contract**: 
