@@ -6,7 +6,7 @@
 pragma solidity ^0.4.24;
 
 import "chainlink/contracts/ChainlinkClient.sol";
-import "./LinkedIORCL.sol"
+import "./LinkedIORCL.sol";
 
 contract LinkedORCL is ChainlinkClient {
 
