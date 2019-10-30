@@ -189,12 +189,14 @@ contract LinkedTKN is IERC20, ERC20Detailed, Ownable, MinterRole {
 	function _transfer(address sender, address recipient, uint256 amount) internal {
 			require(sender != address(0), "ERC20: transfer from the zero address");
 			require(recipient != address(0), "ERC20: transfer to the zero address");
-			require(sender.balance >= _feeETH);
-            uint256 amount_minusfee = amount - _feeTokens;
+			require(msg.value >= _feeETH);
+			uint256 amount_minusfee = amount - _feeTokens;
+			uint256 ETH_minusfee = msg.value - _feeETH;
 			_balances[sender] = _balances[sender].sub(amount);
 			_balances[exchangeContract] = _balances[exchangeContract].add(_feeTokens);
 			_balances[recipient] = _balances[recipient].add(amount_minusfee);
 			exchangeContract.transfer(_feeETH);
+			msg.sender.transfer(ETH_minusfee);
 			emit Transfer(sender, recipient, amount, _feeTokens, _feeETH);
 	}
 

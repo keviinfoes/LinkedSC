@@ -9,7 +9,7 @@
 
 pragma solidity ^0.4.24;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";]
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./LinkedORCL.sol";
 
@@ -58,7 +58,7 @@ contract LinkedEXC {
      }
 
      //Set Tokencontract
-     function changeExchangeAddress(address tokenContractAddr) onlyOwner public returns (bool success) {
+     function changeTokenAddress(address tokenContractAddr) onlyOwner public returns (bool success) {
        require (tokenContractAddr != address(0));
        token = IERC20(tokenContractAddr);
        return true;
@@ -123,11 +123,15 @@ contract LinkedEXC {
      *  of the token (sell/buy for 1 USD).
      */
      function matchingOrdersBuy(uint amount, uint costWei) internal returns (bool success) {
-         require(token.balanceOf(this) >= amount);
-         assert(token.transfer(msg.sender, amount));
-         uint change = msg.value - costWei;
-         msg.sender.transfer(change);
-         return true;
+        uint256 _feeETH = 1 * 1 finney;
+        require(token.balanceOf(this) >= amount);
+        require(msg.value >= _feeETH + costWei);
+        //Send fee for tokentransfer to tokencontract
+        address(token).transfer(_feeETH);
+        assert(token.transfer(msg.sender, amount));
+        uint change = msg.value - (_feeETH + costWei);
+        msg.sender.transfer(change);
+        return true;
      }
      function matchingOrdersSell(uint costWei) internal returns (bool success) {
          require(address(this).balance >= costWei);
