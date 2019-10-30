@@ -39,8 +39,7 @@ contract LinkedEXC {
      /**
      * constructor
      */
-     constructor(address tokenContractAddr) public {
-         token = IERC20(tokenContractAddr);
+     constructor() public {
          owner = msg.sender;
      }
 
@@ -56,6 +55,13 @@ contract LinkedEXC {
          require (OracleAddress != address(0));
          oraclecontract = OracleAddress;
          return true;
+     }
+
+     //Set Tokencontract
+     function changeExchangeAddress(address tokenContractAddr) onlyOwner public returns (bool success) {
+       require (tokenContractAddr != address(0));
+       token = IERC20(tokenContractAddr);
+       return true;
      }
 
          /**

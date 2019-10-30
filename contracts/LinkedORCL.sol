@@ -15,15 +15,21 @@ contract LinkedORCL is ChainlinkClient {
     IEXC public Exchange;
 
     //Constructor sets the token address for the LINK token and the owner.
-    constructor(address exchangeContractAddr) public {
+    constructor() public {
         setPublicChainlinkToken();
-        Exchange = IEXC(exchangeContractAddr);
         owner = msg.sender;
     }
 
     modifier onlyOwner() {
         require(msg.sender == owner);
         _;
+    }
+
+    //Set exchangecontract
+    function changeExchangeAddress(address exchangeContractAddr) onlyOwner public returns (bool success) {
+      require (exchangeContractAddr != address(0));
+      Exchange = IEXC(exchangeContractAddr);
+      return true;
     }
 
     // Creates a Chainlink request with the uint256 multiplier job - for simplicity by the call of
