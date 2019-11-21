@@ -15,7 +15,7 @@ The use of multiple exchanges mitigates the risk of the oracles. Because if one 
 **User voting**:
 - The inital settings will be one exchange, 1% inflation and curve between 0.1% and 1% for transfer fees. Holders of the tokens can vote to add / remove exchanges and adjust these settings. 
 
-The benefit of the stability tax design is its simplicity and the limited need of collateral. The token is self collateralized and the stability "power" increases when it is used more. Because more transactions is more collateral in the exchange.
+The benefit of the stability tax design is its simplicity and the limited need of collateral. The token is self-collateralized and the stability "power" increases when it is used more. Because more transactions is more collateral in the exchange.
 
 ### Instructions deployment ropsten
 1. Install dependencies: `npm install truffle -g` & `npm install @truffle/hdwallet-provider`
