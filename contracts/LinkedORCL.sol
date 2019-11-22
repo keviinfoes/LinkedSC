@@ -3,78 +3,45 @@
 *   The contract uses the decentralized oracle chainlink
 **/
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
-import "chainlink/contracts/ChainlinkClient.sol";
 import "./LinkedIORCL.sol";
 
-contract LinkedORCL is ChainlinkClient {
+contract LinkedORCL {
 
+    IEXC public Exchange;
     uint256 public currentPrice;
     address public owner;
-    IEXC public Exchange;
-
-    //Constructor sets the token address for the LINK token and the owner.
-    constructor() public {
-        setPublicChainlinkToken();
-        owner = msg.sender;
-    }
-
+    
+    /**
+    * @dev Throws if called by any account other than the owner.
+    */
     modifier onlyOwner() {
         require(msg.sender == owner);
         _;
     }
-
-    //Set exchangecontract
-    function changeExchangeAddress(address exchangeContractAddr) onlyOwner public returns (bool success) {
-      require (exchangeContractAddr != address(0));
-      Exchange = IEXC(exchangeContractAddr);
-      return true;
+    
+    //constructor
+    constructor(address exchangeContractAddr) public {
+        owner = msg.sender;
+        Exchange = IEXC(exchangeContractAddr);
     }
-
-    // Creates a Chainlink request with the uint256 multiplier job - for simplicity by the call of
-    function requestEthereumPrice(address _oracle, string _jobId, uint256 _payment)
-        public
-        onlyOwner
-    {
-        // newRequest takes a JobID, a callback address, and callback function as input
-        Chainlink.Request memory req = buildChainlinkRequest(stringToBytes32(_jobId), this, this.fulfill.selector);
-        // Adds a URL with the key "get" to the request parameters
-        req.add("get", "https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD");
-        // Uses input param (dot-delimited string) as the "path" in the request parameters
-        req.add("path", "USD");
-        // Adds an integer with the key "times" to the request parameters
-        req.addInt("times", 100);
-        // Sends the request with the amount of payment specified to the oracle
-        sendChainlinkRequestTo(_oracle, req, _payment);
+    
+    
+    /**
+    * @dev Manualy update the contract to check the exchange contract
+    */
+    function UpdateRate(uint newRate) onlyOwner public {
+        assert(Exchange.updateRate(newRate));
     }
-
-    function stringToBytes32(string memory source) private pure returns (bytes32 result) {
-        bytes memory tempEmptyStringTest = bytes(source);
-        if (tempEmptyStringTest.length == 0) {
-            return 0x0;
-        }
-        assembly { // solhint-disable-line no-inline-assembly
-            result := mload(add(source, 32))
-        }
-    }
-
-    // fulfill receives a uint256 data type
-    function fulfill(bytes32 _requestId, uint256 _price)
-        public
-        // Use recordChainlinkFulfillment to ensure only the requesting oracle can fulfill
-        recordChainlinkFulfillment(_requestId)
-    {
-     currentPrice = _price;
-     Exchange.updateRate(_price);
-    }
-
-    // withdrawLink allows the owner to withdraw any extra LINK on the contract
-    function withdrawLink()
-        public
-        onlyOwner
-    {
-        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
-        require(link.transfer(msg.sender, link.balanceOf(address(this))), "Unable to transfer");
-    }
+    
+    
+    
+     /**
+    * @dev Add new implementation for Link based on the SAI Oracle.
+    * 
+    * DAI oracle because it is cheap (handeld by DAI) and already
+    * available on chain. 
+    */
+    
 }
