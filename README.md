@@ -1,19 +1,13 @@
 # Linked
-This repository contains a self-collateralized stablecoin named linked (LKD). Linked is a stablecoin with minimal complexity. No Collateralized Debt Position (CDP) or multiple coins needed in the implementation. The stability is maintained by the stability tax that guarantees the buy / sell of LKD for the equilivent of 1 USD.
+This repository contains a self-collateralized stablecoin named linked (LKS). Linked is a stablecoin with minimal complexity. No Collateralized Debt Position (CDP) or multiple coins needed in the implementation. The stability is maintained by the stability tax that guarantees the buy / sell of LKD for the equilivent of 1 USD (now or in the future) as long as the token is used.
 
 ## Description
 The design of linked is:
+- **Token contract - ERC20**: The token contract has a embedded stability tax. The stability tax is divided in inflation (1% total LKS) and transfer fee in ETH. The stability tax is send to the custodian contract. The custodian contracts reserves are available for the white listed exchanges. These exchanges have a fixed exchange for the equivalent of 1 USD per LKD.
+- **Exchange contract**: Multiple exchanges can be added. The only difference between these exchanges is the oracle that is used. The exchanges that use the stability reserve have a fixed exchange rate of 1 USD based on the used oracle.
 
-**Token contract - ERC20**: 
-- The token contract has a embedded stability tax. The stability tax is divided in inflation (1% total LKD) and transfer fee (curve between 0.1% and 1% of the transaction paid in LKD and ETH). The stability tax (ETH and LKD) is send to the custodian contract. The custodian contracts reserves are available for the white listed exchanges. These exchanges have a fixed exchange for the equivalent of 1 USD per LKD.
-
-**Exchange contract**: 
-- Multiple exchanges can be added. The only difference between these exchanges is the oracle that is used. The exchanges that use the stability reserve have a fixed exchange rate of 1 USD based on the used oracle.
-
-The use of multiple exchanges mitigates the risk of the oracles. Because if one oracle exchange is broken it can be paused and other exchanges will be used, selected by the users of LKD. 
-
-**User voting**:
-- The inital settings will be one exchange, 1% inflation and curve between 0.1% and 1% for transfer fees. Holders of the tokens can vote to add / remove exchanges and adjust these settings. 
+## Benefits
+The use of multiple exchanges mitigates the risk of the oracles. Because if one oracle exchange is broken it can be paused and other exchanges will be used, selected by the users of LKS themself. The inital settings will be one exchange, 1% inflation and ETH transfer fees (multiple of the gas used). Holders of the tokens can vote to add / remove exchanges and adjust these settings. 
 
 The benefit of the stability tax design is its simplicity and the limited need of collateral. The token is self-collateralized and the stability "power" increases when it is used more. Because more transactions is more collateral in the exchange.
 
