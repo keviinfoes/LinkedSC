@@ -11,7 +11,7 @@ The use of multiple exchanges mitigates the risk of the oracles. Because if one 
 
 The benefit of the stability tax design is its simplicity and the limited need of collateral. The token is self-collateralized and the stability "power" increases when it is used more. Because more transactions is more collateral in the exchange.
 
-### Instructions deployment ropsten
+## Instructions deployment ropsten
 1. Install dependencies: `npm install truffle -g` & `npm install @truffle/hdwallet-provider`
 2. Clone this repository.
 3. Go to the local repository: `cd [path_folder_clone]`
