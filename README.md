@@ -3,7 +3,7 @@ This repository contains a self-collateralized stablecoin named linked (LKS). Li
 
 ## Description
 The design of linked is:
-- **Token contract - ERC20**: The token contract has a embedded stability tax. The stability tax is divided in inflation (1% total LKS) and transfer fee in ETH. The stability tax is send to the custodian contract. The custodian contracts reserves are available for the white listed exchanges. These exchanges have a fixed exchange for the equivalent of 1 USD per LKD.
+- **Token contract - ERC20**: The token contract has a embedded stability tax. The stability tax is divided in inflation (1% total LKS) and transfer fee in ETH. The stability tax is send to the custodian contract. The custodian contracts reserves are available for the white listed exchanges. These exchanges have a fixed exchange rate for the equivalent of 1 USD per LKS.
 - **Exchange contract**: Multiple exchanges can be added. The only difference between these exchanges is the oracle that is used. The exchanges that use the stability reserve have a fixed exchange rate of 1 USD based on the used oracle.
 
 ## Benefits
