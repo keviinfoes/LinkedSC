@@ -1,5 +1,5 @@
 # Linked
-This repository contains a self-collateralized stablecoin named linked (LKS). Linked is a stablecoin with minimal complexity. No Collateralized Debt Position (CDP) or multiple coins needed in the implementation. The stability is maintained by the stability tax that guarantees the buy / sell of LKD for the equilivent of 1 USD (now or in the future) as long as the token is used.
+This repository contains a self-collateralized stablecoin named linked (LKS). Linked is a stablecoin with minimal complexity. No Collateralized Debt Position (CDP) or multiple coins needed in the implementation. The stability is maintained by the stability tax that guarantees the buy / sell of LKS for the equilivent of 1 USD (now or in the future) as long as the token is used.
 
 ## Description
 The design of linked is:
