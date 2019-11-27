@@ -1,5 +1,5 @@
 # LinkedSC
-This repository contains a self-collateralized stablecoin named linked (LKS). LinkedSC is a stablecoin with minimal complexity. No Collateralized Debt Position (CDP), bonds, multiple coins or other complexities in the implementation. Simply the stablecoin and an exchange with a fixed price. The stability tax payed by the holders of the stabelcoin funds the exchange contract. This way the stability tax  guarantees the buy / sell of LKS for the equilivent of 1 USD (now or in the future) as long as the token is used.
+This repository contains a self-collateralized stablecoin named linkedSC (LKS). LinkedSC is a stablecoin with minimal complexity. No Collateralized Debt Position (CDP), bonds, multiple coins or other complexities in the implementation. Simply the stablecoin and an exchange with a fixed price. The stability tax payed by the holders of the stabelcoin funds the exchange contract. This way the stability tax  guarantees the buy / sell of LKS for the equilivent of 1 USD (now or in the future) as long as the token is used.
 
 ## Description
 The design of linked is:
