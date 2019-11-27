@@ -2,7 +2,7 @@
 This repository contains a self-collateralized stablecoin named linkedSC (LKS). LinkedSC is a stablecoin with minimal complexity. No Collateralized Debt Position (CDP), bonds, multiple coins or other complexities in the implementation. Simply the stablecoin and an exchange with a fixed price. The stability tax payed by the holders of the stabelcoin funds the exchange contract. This way the stability tax  guarantees the buy / sell of LKS for the equilivent of 1 USD (now or in the future) as long as the token is used.
 
 ## Description
-The design of linked is:
+The design of linkedSC is:
 - **Token contract - ERC20**: The token contract has a embedded stability tax. The stability tax is divided in inflation (1% total LKS) and transfer fee in ETH. The stability tax is send to the custodian contract. The custodian contracts reserves are available for the white listed exchanges. These exchanges have a fixed exchange rate for the equivalent of 1 USD per LKS.
 - **Exchange contract**: The exchanges that use the stability reserve have a fixed exchange rate of 1 USD based on the used oracle.
 
