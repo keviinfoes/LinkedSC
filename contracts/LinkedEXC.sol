@@ -37,7 +37,7 @@ contract LinkedEXC {
     * @dev Throws if called by any account other than the owner.
     */
     modifier onlyOwner() {
-        require(msg.sender == owner);
+        require(msg.sender == owner, "Ownable: caller is not the owner");
         _;
     }
   
@@ -101,8 +101,8 @@ contract LinkedEXC {
             raterequest = rate;
         }
         require(rate == raterequest, "exchange buy order: rate is not requested rate");
-        uint costWei = (amount.mul(1 ether)).div(rate);
-        require(msg.value >= costWei, "exchange buy order: not enough funds send");
+        uint costWei = (amount).div(rate);
+        require(msg.value >= _feeETH.add(costWei), "exchange buy order: not enough funds send");
         matchingOrdersBuy(amount, costWei);
         indexBuys += 1;
         emit BuyToken(msg.sender, amount, costWei, token.balanceOf(msg.sender));
@@ -120,7 +120,7 @@ contract LinkedEXC {
             raterequest = rate;
         }
         require(rate == raterequest,"exchange sell order: rate is not requested rate");
-        uint costWei = (amount.mul(1 ether)).div(rate);
+        uint costWei = (amount).div(rate);
         require(token.balanceOf(msg.sender) >= amount, "exchange sell order: not enough token funds");
         matchingOrdersSell(amount, costWei);
         indexSells += 1;

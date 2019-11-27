@@ -22,37 +22,61 @@ import "@openzeppelin/contracts/access/roles/MinterRole.sol";
 contract LinkedTKN is IERC20, ERC20Detailed, Ownable, MinterRole {
 	using SafeMath for uint256;
 
-    	address public custodianContract;
-	mapping (address => uint256) private _balances;
-	mapping (address => mapping (address => uint256)) private _allowances;
-	uint256 private _totalSupply;
-	
-	uint256 public _feeETH =1 * 1 finney;
+    	struct Balance { 
+        	uint256 amount;
+        	uint256 taxBlock;
+    	}
+    	struct Tax {
+        	uint256 amount;
+        	uint256 taxBlock;
+    	}
 
+    	//Contract addresses
+    	address payable public custodianContract;
+    	address payable public taxAuthority;
+	//Supply variables
+	mapping (address => Balance) private _balances;
+	mapping (address => mapping (address => uint256)) private _allowances;
+    	uint256 private _totalSupply;
+	//Stability tax variables
+	Tax private _tax;
+	uint256 public _feeETH = 1 finney; 
+    	uint256 public _blockTax = 2; // 2%
+    	uint256 public _blockYear = 2000000; // ~2 million blocks per year
+    
 	/**
-	 * @dev See `IERC20.totalSupply`.
+	 * @dev View supply variables
 	 */
 	function totalSupply() public view returns (uint256) {
 			return _totalSupply;
 	}
-
+    
+    	/**
+    	* Fallback function. Used to load the exchange with ether
+    	*/
+    	function() external payable {}
+    
 	/**
-	 * @dev See `IERC20.balanceOf`.
+	 * @dev show balance of the address.
 	 */
 	function balanceOf(address account) public view returns (uint256) {
-			return _balances[account];
+		uint256 blockDelta = block.number.sub(_balances[account].taxBlock);
+		uint256 yearAmount = _balances[account].amount.div(100).mul(_blockTax);
+		uint256 blockAmount = yearAmount.div(_blockYear);
+		uint256 tax = blockDelta.mul(blockAmount);
+		uint256 balance = _balances[account].amount.sub(tax);
+		return balance;
 	}
 	
-	/**
-    	* Set exchange address
-    	*/
-    	function changeCustodianAddress(address custodianAddress) onlyOwner public returns (bool success) {
-        	require (custodianAddress != address(0));
-        	custodianContract = custodianAddress;
-        	addMinter(custodianAddress);
-   	     	return true;
-    	}
-
+	function taxReserve() public view returns (uint256) {
+		uint256 blockDelta = block.number.sub(_tax.taxBlock);
+		uint256 yearAmount = _totalSupply.div(100).mul(_blockTax);
+		uint256 blockAmount = yearAmount.div(_blockYear);
+		uint256 tax = blockDelta.mul(blockAmount);
+		uint256 balance = _tax.amount.add(tax);
+		return balance;
+	}
+	
 	/**
 	 * @dev See `IERC20.transfer`.
 	 *
@@ -61,7 +85,7 @@ contract LinkedTKN is IERC20, ERC20Detailed, Ownable, MinterRole {
 	 * - `recipient` cannot be the zero address.
 	 * - the caller must have a balance of at least `amount`.
 	 */
-	function transfer(address recipient, uint256 amount) public returns (bool) {
+	function transfer(address recipient, uint256 amount) public payable returns (bool) {
 			_transfer(msg.sender, recipient, amount);
 			return true;
 	}
@@ -97,7 +121,7 @@ contract LinkedTKN is IERC20, ERC20Detailed, Ownable, MinterRole {
 	 * - the caller must have allowance for `sender`'s tokens of at least
 	 * `amount`.
 	 */
-	function transferFrom(address sender, address recipient, uint256 amount) public returns (bool) {
+	function transferFrom(address sender, address recipient, uint256 amount) public payable returns (bool) {
 			_transfer(sender, recipient, amount);
 			_approve(sender, msg.sender, _allowances[sender][msg.sender].sub(amount));
 			return true;
@@ -140,17 +164,36 @@ contract LinkedTKN is IERC20, ERC20Detailed, Ownable, MinterRole {
 	}
 	
 	/**
-	* @dev Mint and burn functions - controlled by Minter (is custodian)
-    	**/
+	 * @dev Mint and burn functions - controlled by Minter (is custodian)
+   	**/
     	function mint(address account, uint256 amount) public onlyMinter returns (bool) {
-        	_mint(account, amount);
-        	return true;
+           		 _mint(account, amount);
+            		return true;
     	}
-   	function burn(address account, uint256 amount) public onlyMinter returns (bool) {
-        	_burn(account, amount);
-        	return true;
+    	function burn(address account, uint256 amount) public onlyMinter returns (bool) {
+            		_burn(account, amount);
+            		return true;
+    	}
+    	function tax() public returns (bool) {
+            		_taxClaim();
+            		return true;
     	}
     
+    	/**
+   	 * Set contract addresses
+    	*/
+    	function changeCustodianAddress(address payable custodianAddress) onlyOwner public returns (bool success) {
+            		require (custodianAddress != address(0));
+            		custodianContract = custodianAddress;
+            		addMinter(custodianAddress);
+           	 return true;
+    	}
+    	function changeTaxAddress(address payable taxAddress) onlyOwner public returns (bool success) {
+            		require (taxAddress != address(0));
+            		taxAuthority = taxAddress;
+            		return true;
+    	}
+
 	/**
 	 * @dev Moves tokens `amount` from `sender` to `recipient`.
 	 *
@@ -169,14 +212,18 @@ contract LinkedTKN is IERC20, ERC20Detailed, Ownable, MinterRole {
 			require(sender != address(0), "ERC20: transfer from the zero address");
 			require(recipient != address(0), "ERC20: transfer to the zero address");
 			require(msg.value >= _feeETH);
-			uint256 ETH_minusfee = msg.value.sub(_feeETH);
-			_balances[sender] = _balances[sender].sub(amount);
-			_balances[recipient] = _balances[recipient].add(amount);
-			//Make exchange address payable
-            address custAddress = address(custodianContract);
-            address payable custPayable = address(uint160(custAddress));
-			custPayable.transfer(_feeETH);
-			msg.sender.transfer(ETH_minusfee);
+			uint256 _changeETH = msg.value.sub(_feeETH);
+			//Send stability fee to custodian
+			custodianContract.transfer(_feeETH);
+			//Set amount to balance minus tax
+			_balances[sender].amount = balanceOf(sender);
+			//Send transaction
+			_balances[sender].amount = _balances[sender].amount.sub(amount);
+			_balances[recipient].amount = _balances[recipient].amount.add(amount);
+			_balances[sender].taxBlock = block.number;
+			_balances[recipient].taxBlock = block.number;
+			//Return stability fee change
+			msg.sender.transfer(_changeETH);
 			emit Transfer(sender, recipient, amount, _feeETH);
 	}
 
@@ -191,9 +238,16 @@ contract LinkedTKN is IERC20, ERC20Detailed, Ownable, MinterRole {
 	 */
 	function _mint(address account, uint256 amount) internal {
 			require(account != address(0), "ERC20: mint to the zero address");
+			//Set amount to balance minus tax
+			_balances[account].amount = balanceOf(account);
+			_balances[account].taxBlock = block.number;
+			_tax.amount = taxReserve();
+			_tax.taxBlock = block.number;
+			//Add minted amount
 			_totalSupply = _totalSupply.add(amount);
-			_balances[account] = _balances[account].add(amount);
-			emit Transfer(address(0), account, amount, _feeETH);
+			_balances[account].amount = _balances[account].amount.add(amount);
+			
+			emit Transfer(address(0), account, amount, 0);
 	}
 
 	 /**
@@ -209,9 +263,13 @@ contract LinkedTKN is IERC20, ERC20Detailed, Ownable, MinterRole {
 	 */
 	function _burn(address account, uint256 value) internal {
 			require(account != address(0), "ERC20: burn from the zero address");
-			_totalSupply = _totalSupply.sub(value);
-			_balances[account] = _balances[account].sub(value);
-			emit Transfer(account, address(0), value, _feeETH);
+			//Set amount to balance minus tax
+			_balances[account].amount = balanceOf(account);
+			//Remove burned amount
+			_balances[account].amount = _balances[account].amount.sub(value);
+			_tax.amount = taxReserve();
+			_tax.taxBlock = block.number;
+			emit Transfer(account, address(0), value, 0);
 	}
 
 	/**
@@ -230,19 +288,18 @@ contract LinkedTKN is IERC20, ERC20Detailed, Ownable, MinterRole {
 	function _approve(address owner, address spender, uint256 value) internal {
 			require(owner != address(0), "ERC20: approve from the zero address");
 			require(spender != address(0), "ERC20: approve to the zero address");
-
 			_allowances[owner][spender] = value;
 			emit Approval(owner, spender, value);
 	}
-
+	
 	/**
-	 * @dev Destoys `amount` tokens from `account`.`amount` is then deducted
-	 * from the caller's allowance.
-	 *
-	 * See `_burn` and `_approve`.
+	 * @dev claim the tax reserve
 	 */
-	function _burnFrom(address account, uint256 amount) internal {
-			_burn(account, amount);
-			_approve(account, msg.sender, _allowances[account][msg.sender].sub(amount));
+	function _taxClaim() internal {
+			require(msg.sender == taxAuthority);
+			_tax.amount = taxReserve();
+			_tax.taxBlock = block.number;
+			_balances[taxAuthority].amount.add(_tax.amount);
+			_tax.amount = 0;
 	}
-}
+} 
