@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@openzeppelin/contracts": "^2.3.0",
+    "@openzeppelin/contracts": "^4.4.2",
     "chainlink": "^0.7.6",
     "install": "^0.13.0",
     "npm": "^6.12.0"
